@@ -2,7 +2,9 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
   <title>Zadania</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,57 +12,33 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css" />
-  
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#1e88ff">
-  
 </head>
 <body>
 
-<div class="app">
+<header class="header">
+  <h1 id="title">Zadania</h1>
+</header>
 
-  <header class="header">
-    <h1 id="title">Zadania</h1>
-    <p id="subtitle"></p>
-  </header>
+<main id="tasksView" class="view active"></main>
 
-  <!-- ZADANIA -->
-  <main id="tasksView" class="view active">
-    <div class="add-task">
-      <input id="taskInput" placeholder="Dodaj zadanie na ten dzień" />
-      <button onclick="addTask()">+</button>
+<main id="calendarView" class="view"></main>
+
+<nav class="tabbar">
+  <button class="active" onclick="switchTab('tasks')">
+    <span>📋</span>Zadania
+  </button>
+  <button onclick="switchTab('calendar')">
+    <span>📅</span>Kalendarz
+  </button>
+</nav>
+
+<!-- MODAL -->
+<div id="taskModal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="modalTitle">Nowe zadanie</h3>
+    <input id="modalInput" placeholder="Treść zadania" />
+    <input id="modalDate" type="date" />
+    <div class="modal-actions">
+      <button onclick="closeModal()">Anuluj</button>
+      <button class="primary" onclick="saveModal()">Zapisz</button>
     </div>
-
-    <ul id="taskList"></ul>
-  </main>
-
-  <!-- KALENDARZ -->
-  <main id="calendarView" class="view">
-    <div class="calendar-header">
-      <button onclick="changeMonth(-1)">‹</button>
-      <span id="monthLabel"></span>
-      <button onclick="changeMonth(1)">›</button>
-    </div>
-
-    <div class="weekdays">
-      <span>Pn</span><span>Wt</span><span>Śr</span>
-      <span>Cz</span><span>Pt</span><span>Sb</span><span>Nd</span>
-    </div>
-
-    <div class="calendar-grid" id="calendarGrid"></div>
-  </main>
-
-  <!-- TAB BAR -->
-  <nav class="tabbar">
-    <button class="active" onclick="switchTab('tasks')">Zadania</button>
-    <button onclick="switchTab('calendar')">Kalendarz</button>
-  </nav>
-
-</div>
-
-<script src="app.js"></script>
-</body>
-</html>
-
