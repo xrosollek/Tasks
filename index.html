@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zadania</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <h1 id="title">Zadania</h1>
+    <p id="subtitle"></p>
+  </header>
+
+  <!-- ZADANIA -->
+  <main id="tasksView" class="view active">
+    <div class="add-task">
+      <input id="taskInput" placeholder="Dodaj zadanie na ten dzień" />
+      <button onclick="addTask()">+</button>
+    </div>
+
+    <ul id="taskList"></ul>
+  </main>
+
+  <!-- KALENDARZ -->
+  <main id="calendarView" class="view">
+    <div class="calendar-header">
+      <button onclick="changeMonth(-1)">‹</button>
+      <span id="monthLabel"></span>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+
+    <div class="weekdays">
+      <span>Pn</span><span>Wt</span><span>Śr</span>
+      <span>Cz</span><span>Pt</span><span>Sb</span><span>Nd</span>
+    </div>
+
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </main>
+
+  <!-- TAB BAR -->
+  <nav class="tabbar">
+    <button class="active" onclick="switchTab('tasks')">Zadania</button>
+    <button onclick="switchTab('calendar')">Kalendarz</button>
+  </nav>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
