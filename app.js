@@ -1,127 +1,106 @@
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let modalTaskId = null;
+let modalDate = null;
 
-let selectedDate = new Date();
-let calendarMonth = new Date();
-
-const taskList = document.getElementById("taskList");
-const calendarGrid = document.getElementById("calendarGrid");
-const monthLabel = document.getElementById("monthLabel");
-const subtitle = document.getElementById("subtitle");
+const tasksView = document.getElementById("tasksView");
+const calendarView = document.getElementById("calendarView");
 
 function save() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-function formatDate(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+function format(d) {
+  return d.toISOString().split("T")[0];
 }
 
-function addTask() {
-  const input = document.getElementById("taskInput");
-  if (!input.value.trim()) return;
-
-  tasks.push({
-    id: Date.now(),
-    text: input.value,
-    date: formatDate(selectedDate),
-    done: false
-  });
-
-  input.value = "";
-  save();
-  render();
-}
-
-function toggleTask(id) {
-  const task = tasks.find(t => t.id === id);
-  task.done = !task.done;
-  save();
-  render();
-}
+/* -------- TASKS VIEW -------- */
 
 function renderTasks() {
-  taskList.innerHTML = "";
+  tasksView.innerHTML = "";
 
-  subtitle.innerText = selectedDate.toLocaleDateString("pl-PL", {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
+  const grouped = {};
+  tasks.forEach(t => {
+    if (!grouped[t.date]) grouped[t.date] = [];
+    grouped[t.date].push(t);
   });
 
-  tasks
-    .filter(t => t.date === formatDate(selectedDate))
-    .forEach(task => {
-      const li = document.createElement("li");
-      if (task.done) li.classList.add("done");
+  Object.keys(grouped).sort().forEach(date => {
+    const section = document.createElement("div");
+    section.className = "section";
+    section.innerHTML = `<h2>${new Date(date).toLocaleDateString("pl-PL")}</h2>`;
 
-      const checkbox = document.createElement("div");
-      checkbox.className = "checkbox";
-      if (task.done) checkbox.classList.add("checked");
-      checkbox.onclick = () => toggleTask(task.id);
-
-      li.appendChild(checkbox);
-      li.append(task.text);
-      taskList.appendChild(li);
+    grouped[date].forEach(task => {
+      const el = document.createElement("div");
+      el.className = "task" + (task.done ? " done" : "");
+      el.innerHTML = `
+        <div class="checkbox"></div>
+        <div>${task.text}</div>
+      `;
+      el.onclick = () => openModal(task);
+      section.appendChild(el);
     });
+
+    tasksView.appendChild(section);
+  });
 }
+
+/* -------- CALENDAR VIEW -------- */
 
 function renderCalendar() {
-  calendarGrid.innerHTML = "";
+  calendarView.innerHTML = `<div class="calendar"></div>`;
+  const grid = calendarView.querySelector(".calendar");
 
-  const year = calendarMonth.getFullYear();
-  const month = calendarMonth.getMonth();
-
-  monthLabel.innerText = calendarMonth.toLocaleDateString("pl-PL", {
-    month: "long",
-    year: "numeric"
-  });
-
-  const firstDay = new Date(year, month, 1).getDay() || 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  for (let i = 1; i < firstDay; i++) {
-    calendarGrid.appendChild(document.createElement("div"));
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month, d);
-    const dateStr = formatDate(date);
-
-    const div = document.createElement("div");
-    div.className = "day";
-    div.innerText = d;
-
-    if (dateStr === formatDate(new Date())) div.classList.add("today");
-    if (dateStr === formatDate(selectedDate)) div.classList.add("selected");
-    if (tasks.some(t => t.date === dateStr)) div.classList.add("has-task");
-
-    div.onclick = () => {
-      selectedDate = date;
-      switchTab("tasks");
-      render();
-    };
-
-    calendarGrid.appendChild(div);
+  for (let i = 1; i <= 30; i++) {
+    const d = format(new Date(2024, 8, i));
+    const day = document.createElement("div");
+    day.className = "day";
+    day.innerText = i;
+    if (tasks.some(t => t.date === d)) day.classList.add("has-task");
+    day.onclick = () => openModal(null, d);
+    grid.appendChild(day);
   }
 }
 
-function changeMonth(delta) {
-  calendarMonth.setMonth(calendarMonth.getMonth() + delta);
-  renderCalendar();
+/* -------- MODAL -------- */
+
+function openModal(task = null, date = null) {
+  modalTaskId = task?.id || null;
+  modalDate = task?.date || date || format(new Date());
+  document.getElementById("modalInput").value = task?.text || "";
+  document.getElementById("modalDate").value = modalDate;
+  document.getElementById("taskModal").classList.remove("hidden");
 }
+
+function closeModal() {
+  document.getElementById("taskModal").classList.add("hidden");
+}
+
+function saveModal() {
+  const text = modalInput.value;
+  const date = modalDateInput.value;
+
+  if (modalTaskId) {
+    const t = tasks.find(t => t.id === modalTaskId);
+    t.text = text;
+    t.date = date;
+  } else {
+    tasks.push({ id: Date.now(), text, date, done: false });
+  }
+
+  save();
+  closeModal();
+  render();
+}
+
+/* -------- NAV -------- */
 
 function switchTab(tab) {
-  document.getElementById("tasksView").classList.toggle("active", tab === "tasks");
-  document.getElementById("calendarView").classList.toggle("active", tab === "calendar");
-
-  document.querySelectorAll(".tabbar button").forEach(b => b.classList.remove("active"));
-  document.querySelector(`.tabbar button[onclick*="${tab}"]`).classList.add("active");
-
-  document.getElementById("title").innerText =
-    tab === "tasks" ? "Zadania" : "Kalendarz";
+  tasksView.classList.toggle("active", tab === "tasks");
+  calendarView.classList.toggle("active", tab === "calendar");
+  document.querySelectorAll(".tabbar button")
+    .forEach(b => b.classList.remove("active"));
+  document.querySelector(`.tabbar button[onclick*=${tab}]`)
+    .classList.add("active");
 }
 
 function render() {
